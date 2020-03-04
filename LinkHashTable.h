@@ -23,7 +23,7 @@ class HashNode
 {
 private:
 	friend class HashTable<DataType>;
-	DataType data = 0;
+	DataType data;
 	HashNode<DataType> *next = nullptr;
 	HashNode(void);
 	HashNode(const DataType &Data, HashNode<DataType> *Next);
@@ -58,18 +58,19 @@ private:
 	void remove_all(const int &idx, const DataType &Data);
 
 public:
-	HashTable(const int Max, int (*HashFunction)(DataType &Data));
+	HashTable(const int Max, int (*HashFunction)(DataType &Data), const DataType Default);
 	~HashTable();
 
 	Result insert(DataType Data);
-	Result search(const DataType Data) const;
+	Result search(DataType Data) const;
 	Result remove(DataType Data);
 
 	void print_Table() const;
+	void print_Table_with_Target(DataType Target) const;
 };
 
 template <class DataType>
-HashTable<DataType>::HashTable(const int Max, int (*HashFunction)(DataType &Data))
+HashTable<DataType>::HashTable(const int Max, int (*HashFunction)(DataType &Data), const DataType Default)
 {
 	this->hash_func = HashFunction;
 	this->max_size = Max;
@@ -82,7 +83,7 @@ HashTable<DataType>::HashTable(const int Max, int (*HashFunction)(DataType &Data
 	{
 		for (int i = 0; i < this->max_size; i++)
 		{
-			this->table[i] = new HashNode<DataType>(0, nullptr);
+			this->table[i] = new HashNode<DataType>(Default, nullptr);
 		}
 	}
 }
@@ -127,7 +128,7 @@ void HashTable<DataType>::push_back(const int &idx, const DataType &Data)
 }
 
 template <class DataType>
-Result HashTable<DataType>::search(const DataType Data) const
+Result HashTable<DataType>::search(DataType Data) const
 {
 	int idx = this->hash_func(Data);
 	if (idx < 0 || idx >= this->max_size)
@@ -191,13 +192,42 @@ void HashTable<DataType>::print_Table() const
 		cout << "[" << setw(3) << i << "]";
 		if (this->table[i]->next == nullptr)
 		{
-			cout << " -> Empty" << endl;
+			cout << " -> *" << endl;
 		}
 		else
 		{
 			for (HashNode<DataType> *p = this->table[i]->next; p != nullptr; p = p->next)
 			{
 				cout << " -> " << p->data;
+			}
+			cout << endl;
+		}
+	}
+}
+
+template <class DataType>
+void HashTable<DataType>::print_Table_with_Target(DataType Target) const
+{
+	for (int i = 0; i < this->max_size; i++)
+	{
+		cout << "[" << setw(3) << i << "]";
+		if (this->table[i]->next == nullptr)
+		{
+			cout << " -> *" << endl;
+		}
+		else
+		{
+			for (HashNode<DataType> *p = this->table[i]->next; p != nullptr; p = p->next)
+			{
+				if (p->data == Target)
+				{
+					cout << " -> ( ";
+					cout << p->data << " )";
+				}
+				else
+				{
+					cout << " -> " << p->data;
+				}
 			}
 			cout << endl;
 		}
